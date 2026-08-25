@@ -18,7 +18,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 // Builds a docker image tagged as bookstore-api:latest
-                sh 'docker build -t bookstore-api:latest -f BookStore.Api/Dockerfile .'
+                sh 'docker build -t bookstore-api:latest .'
             }
         }
 
