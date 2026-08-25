@@ -15,22 +15,55 @@ pipeline {
             }
         }
         
+        stage('Run Tests & Coverage') {
+            steps {
+                // Run tests, collect code coverage in Cobertura format, and output results to a 'coverage' folder
+                sh '''
+                    dotnet test BookStore.Tests/BookStore.Tests.csproj \
+                        --configuration Release \
+                        --no-build \
+                        --collect:"XPlat Code Coverage" \
+                        --settings BookStore.Tests/coverlet.runsettings || true
+                '''
+                
+                // Convert the XML coverage file into a professional HTML report using ReportGenerator
+                // (Using the full path to ensure Jenkins finds the global tool)
+                sh '''
+                    /root/.dotnet/tools/reportgenerator \
+                        -reports:"BookStore.Tests/TestResults/**/coverage.cobertura.xml" \
+                        -targetdir:"coveragereport" \
+                        -reporttypes:Html
+                '''
+            }
+        }
+        
         stage('Build Docker Image') {
             steps {
-                // Builds a docker image tagged as bookstore-api:latest
                 sh 'docker build -t bookstore-api:latest .'
             }
         }
 
         stage('Deploy / Run Container') {
             steps {
-                // Stop and remove any old container running on port 8083 to avoid port conflict
                 sh 'docker stop bookstore-api-container || true'
                 sh 'docker rm bookstore-api-container || true'
-                
-                // Run the new container mapping port 8083 on your host to port 8080 inside the container
                 sh 'docker run -d -p 8083:8080 --name bookstore-api-container bookstore-api:latest'
             }
+        }
+    }
+    
+    post {
+        success {
+            // Publish the HTML code coverage report to the Jenkins dashboard
+            publishHTML([
+                allowMissing: false,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'coveragereport',
+                reportFiles: 'index.html',
+                reportName: 'Code Coverage Report',
+                evalAllFiles: false
+            ])
         }
     }
 }
