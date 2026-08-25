@@ -24,9 +24,10 @@ pipeline {
                         --collect:"XPlat Code Coverage" || true
                 '''
                 
-                // Invoke ReportGenerator using its absolute path inside the container
+                // Install ReportGenerator locally in the workspace (bypasses all root permission issues)
                 sh '''
-                    /root/.dotnet/tools/dotnet-reportgenerator \
+                    dotnet tool install dotnet-reportgenerator-globaltool --tool-path ./tools || true
+                    ./tools/reportgenerator \
                         -reports:"BookStore.Tests/TestResults/**/coverage.cobertura.xml" \
                         -targetdir:"coveragereport" \
                         -reporttypes:Html
