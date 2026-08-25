@@ -24,7 +24,6 @@ pipeline {
                         --collect:"XPlat Code Coverage" || true
                 '''
                 
-                // Install ReportGenerator locally in the workspace (bypasses all root permission issues)
                 sh '''
                     dotnet tool install dotnet-reportgenerator-globaltool --tool-path ./tools || true
                     ./tools/reportgenerator \
@@ -48,7 +47,9 @@ pipeline {
                 sh 'docker run -d -p 8083:8080 --name bookstore-api-container bookstore-api:latest'
             }
         }
-		post {
+    }
+    
+    post {
         success {
             // Publishes the HTML code coverage report to the Jenkins job dashboard sidebar
             publishHTML([
@@ -61,6 +62,5 @@ pipeline {
                 evalAllFiles: false
             ])
         }
-    }
     }
 }
