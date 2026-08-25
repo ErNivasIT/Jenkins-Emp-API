@@ -24,8 +24,9 @@ pipeline {
                         --collect:"XPlat Code Coverage" || true
                 '''
                 
+                // Invoke ReportGenerator using its absolute path inside the container
                 sh '''
-                    dotnet reportgenerator \
+                    /root/.dotnet/tools/dotnet-reportgenerator \
                         -reports:"BookStore.Tests/TestResults/**/coverage.cobertura.xml" \
                         -targetdir:"coveragereport" \
                         -reporttypes:Html
