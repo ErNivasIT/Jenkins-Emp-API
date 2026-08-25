@@ -17,19 +17,17 @@ pipeline {
         
         stage('Run Tests & Coverage') {
             steps {
-                // Run tests, collect code coverage in Cobertura format, and output results to a 'coverage' folder
+                // Run tests and collect XPlat Code Coverage without needing a separate .runsettings file
                 sh '''
                     dotnet test BookStore.Tests/BookStore.Tests.csproj \
                         --configuration Release \
                         --no-build \
-                        --collect:"XPlat Code Coverage" \
-                        --settings BookStore.Tests/coverlet.runsettings || true
+                        --collect:"XPlat Code Coverage" || true
                 '''
                 
-                // Convert the XML coverage file into a professional HTML report using ReportGenerator
-                // (Using the full path to ensure Jenkins finds the global tool)
+                // Generate the HTML report using dotnet tool execution
                 sh '''
-                    /root/.dotnet/tools/reportgenerator \
+                    dotnet reportgenerator \
                         -reports:"BookStore.Tests/TestResults/**/coverage.cobertura.xml" \
                         -targetdir:"coveragereport" \
                         -reporttypes:Html
