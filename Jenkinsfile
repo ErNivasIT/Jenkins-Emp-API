@@ -48,5 +48,19 @@ pipeline {
                 sh 'docker run -d -p 8083:8080 --name bookstore-api-container bookstore-api:latest'
             }
         }
+		post {
+        success {
+            // Publishes the HTML code coverage report to the Jenkins job dashboard sidebar
+            publishHTML([
+                allowMissing: false,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'coveragereport',
+                reportFiles: 'index.html',
+                reportName: 'Code Coverage Report',
+                evalAllFiles: false
+            ])
+        }
+    }
     }
 }
